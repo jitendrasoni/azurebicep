@@ -1,0 +1,27 @@
+stages:
+- stage: DEV
+  jobs:
+  - template: apim-jobs.yaml
+    parameters:
+      variableGroup: APIM - DEV
+      serviceAccount: bicep-connection
+      agentPool: Azure Pipelines
+      environment: APIM - DEV
+
+- stage: TEST
+  jobs:
+  - template: apim-jobs.yaml
+    parameters:
+      variableGroup: APIM - TEST
+      serviceAccount: bicep-connection
+      agentPool: Azure Pipelines
+      environment: APIM - TEST
+
+- stage: PROD
+  jobs:
+  - template: apim-jobs.yaml
+    parameters:
+      variableGroup: APIM - PROD
+      serviceAccount: bicep-connection
+      agentPool: Azure Pipelines
+      environment: APIM - PROD

@@ -1,0 +1,45 @@
+parameters:
+  - name: 'variableGroup'
+    type: string
+  - name: 'serviceAccount'
+    type: string
+  - name: 'agentPool'
+    type: string
+  - name: 'environment'
+    type: string
+    
+jobs:
+  - deployment: DeployAPIMAPI
+    displayName: APIM APIs deployment
+    environment: ${{ parameters.environment }}
+    variables:
+      - group: ${{ parameters.variableGroup }}
+    pool:
+      name: ${{ parameters.agentPool }}
+    strategy:
+      runOnce:
+        deploy:  
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              targetPath: '$(System.ArtifactsDirectory)/templates'
+
+          - task: AzureCLI@2
+            displayName: 'APIM API Deployment'
+            inputs:
+              azureSubscription: ${{ parameters.serviceAccount }}
+              deploymentScope: 'Resource Group'
+              scriptType: pscore
+              scriptLocation: inlineScript
+              inlineScript: |
+                az deployment group create `
+                --resource-group $(RESOURCE_GROUP_APIM) `
+                --template-file $(System.ArtifactsDirectory)/templates/apim-main.bicep `
+                --parameters `
+                  apimName=$(APIM_NAME) `
+                  apiName=$(API_NAME) `
+                  apiDisplayName=$(API_DISPLAY_NAME) `
+                  apiDescription=$(API_DESCRIPTION) `
+                  apiServiceUrl=$(API_SERVICE_URL)                                                         
